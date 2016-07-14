@@ -8,6 +8,9 @@
 #include "colorshaderclass.h"
 #include "textureshaderclass.h"
 
+#include "lightshaderclass.h"
+#include "lightclass.h"
+
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
 const float SCREEN_DEPTH = 1000.0f;
@@ -26,7 +29,7 @@ public:
 	bool Frame();
 	
 private:
-	bool Render();
+	bool Render(float);
 
 	D3DClass* m_D3D;
 	CameraClass* m_Camera;
@@ -35,6 +38,8 @@ private:
 
 	TextureShaderClass* m_TextureShader;
 
+	LightShaderClass* m_lightShader;
+	LightClass* m_Light;
 
 };
 
