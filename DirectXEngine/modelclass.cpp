@@ -19,9 +19,18 @@ ModelClass::ModelClass(const ModelClass&)
 
 }
 
-bool ModelClass::Initialize(ID3D11Device* device,ID3D11DeviceContext* deviceContext,char* textureFileName)
+bool ModelClass::Initialize(ID3D11Device* device,ID3D11DeviceContext* deviceContext,char* modelFilename,char* textureFileName)
 {
 	bool result;
+
+	//Load in the model data
+	result = LoadModel(modelFilename);
+	if (!result)
+	{
+		return false;
+	}
+
+
 
 	//initialize the vertex and index buffers
 	result = InitializeBuffers(device);
@@ -47,6 +56,8 @@ void ModelClass::Shutdown()
 
 
 	ShutdownBuffers();
+
+	ReleaseModel();
 
 	return;
 }
@@ -76,12 +87,8 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;
+	int i;
 
-	//set the number of vertices in the vertex array
-	m_vertexCount = 3;
-
-	//set the number of indices in the index array
-	m_indexCount = 3;
 
 	//Create the vertex array
 	vertices = new VertexType[m_vertexCount];
@@ -96,26 +103,15 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 		return false;
 	}
 
-	//load the vertex array with data
-	vertices[0].position = XMFLOAT3(-1.0f, -1.0f, 0.0f);  //Bottom Left
-	vertices[0].texture = XMFLOAT2(0.0f, 1.0f);
-	vertices[0].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
-	//vertices[0].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	//Load the vertex array and index array with data
+	for (i = 0;i < m_vertexCount;i++)
+	{
+		vertices[i].position = XMFLOAT3(m_model[i].x, m_model[i].y, m_model[i].z);
+		vertices[i].texture = XMFLOAT2(m_model[i].tu, m_model[i].tv);
+		vertices[i].normal = XMFLOAT3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
 
-	vertices[1].position = XMFLOAT3(0.0f, 1.0f, 0.0f); //Top middle
-	vertices[1].texture = XMFLOAT2(0.5f, 0.0f);
-	vertices[1].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
-	//vertices[1].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-
-	vertices[2].position = XMFLOAT3(1.0f, -1.0f, 0.0f);
-	vertices[2].texture = XMFLOAT2(1.0f, 1.0f);
-	vertices[2].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
-	//vertices[2].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
-
-	//Load the index array with data
-	indices[0] = 0; //bottom left
-	indices[1] = 1; //top middle
-	indices[2] = 2; //bottom right
+		indices[i] = i;
+	}
 
 	//set up description of static vertex buffer
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -242,4 +238,78 @@ void ModelClass::ReleaseTexture()
 	}
 	return;
 }
+
+
+bool ModelClass::LoadModel(char* filename)
+{
+	ifstream fin;
+	char input;
+	int i;
+
+
+	//open the model file
+	fin.open(filename);
+
+	//if it could not open the file then exit
+	if (fin.fail())
+	{
+		return false;
+	}
+
+	//Read up to the value of the vertex count
+	fin.get(input);
+	while (input != ':')
+	{
+		fin.get(input);
+	}
+
+	//Read in the vertex count
+	fin >> m_vertexCount;
+
+	//set number of indices to the same as vertex count
+	m_indexCount = m_vertexCount;
+
+	//create the model using the vertex count
+	m_model = new ModelType[m_vertexCount];
+	if (!m_model)
+	{
+		return false;
+	}
+
+	//Read up to beginning of the data
+	fin.get(input);
+	while (input != ':')
+	{
+		fin.get(input);
+	}
+	fin.get(input);
+	fin.get(input);
+
+	//read in vertex data
+	for (int i = 0;i < m_vertexCount;i++)
+	{
+		fin >> m_model[i].x >> m_model[i].y >> m_model[i].z;
+		fin >> m_model[i].tu >> m_model[i].tv;
+		fin >> m_model[i].nx >> m_model[i].ny >> m_model[i].nz;
+
+	}
+
+	//close the model file
+	fin.close();
+
+	return true;
+}
+
+void ModelClass::ReleaseModel()
+{
+	if (m_model)
+	{
+		delete[] m_model;
+		m_model = 0;
+	}
+
+	return;
+}
+
+
 
