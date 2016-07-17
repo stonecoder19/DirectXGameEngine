@@ -7,7 +7,8 @@ cbuffer Lightbuffer
 	float4 ambientColor;
 	float4 diffuseColor;
 	float3 lightDirection;
-	float padding;
+	float  specularPower;
+	float4 specularColor;
 
 };
 
@@ -17,6 +18,7 @@ struct PixelInputType
 	float4 position : SV_POSITION;
 	float2 tex : TEXCOORD0;
 	float3 normal : NORMAL;
+	float3 viewDirection : TEXCOORD1;
 
 };
 
@@ -26,6 +28,8 @@ float4 LightPixelShader(PixelInputType input) : SV_TARGET
 	float3 lightDir;
 	float lightIntensity;
 	float color;
+	float3 reflection;
+	float4 specular;
 
 
 	textureColor = shaderTexture.Sample(SampleType, input.tex);
@@ -34,17 +38,35 @@ float4 LightPixelShader(PixelInputType input) : SV_TARGET
 
 	lightDir = -lightDirection;
 
+	specular = float4(0.0f,0.0f,0.0f,0.0f);
+
 	//calculate amount of light on this pixel
 	lightIntensity  = saturate(dot(input.normal, lightDir));
 
 	if(lightIntensity > 0.0f)
 	{
+		//determine the diffuse color based on diffuse color and light intensity
 		color += (diffuseColor*lightIntensity);
+
+		//saturate ambient and difuse color
+		color = saturate(color);
+
+		//calculate reflection vector based light intensity and normal
+		reflection = normalize(2* lightIntensity * input.normal - lightDir);
+
+		//determine amount of specular light
+		specular = pow(saturate(dot(reflection, input.viewDirection)), specularPower);
+
+
+
+
 	}
 
-	color = saturate(color);
-
+	//multiply texture pixel color and color
 	color = color * textureColor;
+
+	//add specular component
+	color = saturate(color + specular);
 	
 
 	return color;
