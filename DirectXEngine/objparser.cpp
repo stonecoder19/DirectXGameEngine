@@ -21,7 +21,7 @@ bool ReadFileCounts(char*, int&, int&, int&, int&);
 bool LoadDataStructures(char*, int, int, int, int);
 
 
-int main()
+/*int main()
 {
 	bool result;
 	char filename[256];
@@ -57,12 +57,12 @@ int main()
 
 	return 0;
 
-}
+}*/
 
 
 void GetModelFilename(char* filename)
 {
-	bool done;
+	bool done = false;
 	ifstream fin;
 
 	while (!done)
