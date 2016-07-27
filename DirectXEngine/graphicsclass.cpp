@@ -55,7 +55,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	m_Camera->SetPosition(0.0f, 0.0f, -10.0f);
 
 	//Create the model object
-	m_Model = new ModelClass;
+	/*m_Model = new ModelClass;
 	if (!m_Model)
 	{
 		return false;
@@ -67,7 +67,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	{
 		MessageBox(hwnd, L"Could not intialize the model object", L"Error", MB_OK);
 		return false;
-	}
+	}*/
 
 	//create the color shader object
 	/*m_ColorShader = new ColorShaderClass;
@@ -88,7 +88,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 
 
 	//create the texture shader object
-	/*m_TextureShader = new TextureShaderClass;
+	m_TextureShader = new TextureShaderClass;
 	if (!m_TextureShader)
 	{
 		return false;
@@ -100,9 +100,9 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	{
 		MessageBox(hwnd, L"Could not initalize the texture shader object", L"Error", MB_OK);
 		return false;
-	}*/
+	}
 
-	m_lightShader = new LightShaderClass;
+	/*m_lightShader = new LightShaderClass;
 	if (!m_lightShader)
 	{
 		return false;
@@ -127,7 +127,22 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	m_Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
 	m_Light->SetDirection(0.0f, 0.0f, 1.0f);
 	m_Light->SetSpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
-	m_Light->SetSpecularPower(32.0f);
+	m_Light->SetSpecularPower(32.0f);*/
+
+	//create bitmap object
+	m_Bitmap = new BitmapClass;
+	if (!m_Bitmap)
+	{
+		return false;
+	}
+
+	//intialize the bitmap object
+	result = m_Bitmap->Inititalize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), screenWidth, screenHeight, "stone01.tga", 256, 256);
+	if (!result)
+	{
+		MessageBox(hwnd, L"Could not initialize bitmap object", L"Error", MB_OK);
+		return false;
+	}
 
 
 	return true;
@@ -138,6 +153,12 @@ void GraphicsClass::Shutdown()
 {
 
 
+	if (m_Bitmap)
+	{
+		m_Bitmap->Shutdown();
+		delete m_Bitmap;
+		m_Bitmap = 0;
+	}
 	//Release the light object
 	if (m_Light)
 	{
@@ -146,21 +167,21 @@ void GraphicsClass::Shutdown()
 	}
 
 	//Release the light shader object
-	if (m_lightShader)
+	/*if (m_lightShader)
 	{
 		m_lightShader->Shutdown();
 		delete m_lightShader;
 		m_lightShader = 0;
-	}
+	}*/
 
 
 	//release the texture object
-	/*if (m_TextureShader)
+	if (m_TextureShader)
 	{
 		m_TextureShader->Shutdown();
 		delete m_TextureShader;
 		m_TextureShader = 0;
-	}*/
+	}
 
 
 	if (m_D3D)
@@ -222,7 +243,7 @@ bool GraphicsClass::Frame()
 
 bool GraphicsClass::Render(float rotation)
 {
-	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	XMMATRIX worldMatrix, viewMatrix, projectionMatrix, orthoMatrix;
 	bool result;
 
 
@@ -237,8 +258,23 @@ bool GraphicsClass::Render(float rotation)
 	m_Camera->GetViewMatrix(viewMatrix);
 	m_D3D->GetProjectionMatrix(projectionMatrix);
 
+	m_D3D->GetOrthoMatrix(orthoMatrix);
+
+	//turn off z buffer
+	m_D3D->TurnZBufferOff();
+
+
+	//put bitmap vertex and index buffers on pipeline
+	result = m_Bitmap->Render(m_D3D->GetDeviceContext(), 100, 100);
+	if (!result)
+	{
+		return false;
+	}
+
+
+
 	//rotate the world matrix by the rotation value
-	worldMatrix = XMMatrixRotationY(rotation);
+	/*worldMatrix = XMMatrixRotationY(rotation);
 
 	//put the model vertex and index buffers on the graphics pipeline to prepare them for drawing
 	m_Model->Render(m_D3D->GetDeviceContext());
@@ -246,12 +282,12 @@ bool GraphicsClass::Render(float rotation)
 
 	result = m_lightShader->Render(m_D3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
 		m_Model->GetTexture(), m_Light->GetDirection(),m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(),
-						m_Camera->GetPosition(),m_Light->GetSpecularColor(),m_Light->GetSpecularPower());
+						m_Camera->GetPosition(),m_Light->GetSpecularColor(),m_Light->GetSpecularPower());*/
 
-	if (!result)
+	/*if (!result)
 	{
 		return false;
-	}
+	}*/
 
 	//render the model using the color shader
 	/*result = m_ColorShader->Render(m_D3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix);
@@ -260,13 +296,15 @@ bool GraphicsClass::Render(float rotation)
 		return false;
 	}*/
 
-	/*result = m_TextureShader->Render(m_D3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Model->GetTexture());
+	result = m_TextureShader->Render(m_D3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix,orthoMatrix, m_Bitmap->GetTexture());
 	if (!result)
 	{
 		return false;
-	}*/
+	}
 
-	
+	m_D3D->TurnZBufferOn();
+
+
 	//present the rendered scene to screen
 	m_D3D->EndScene();
 
