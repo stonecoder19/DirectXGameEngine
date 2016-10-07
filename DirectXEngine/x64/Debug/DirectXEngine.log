@@ -1,0 +1,25 @@
+﻿  textureshaderclass.cpp
+c:\users\matt\documents\development\c++\directxgameengine\directxengine\textureshaderclass.cpp(260): warning C4244: '=': conversion from 'SIZE_T' to 'unsigned long', possible loss of data
+c:\users\matt\documents\development\c++\directxgameengine\directxengine\textureshaderclass.cpp(266): warning C4018: '<': signed/unsigned mismatch
+c:\users\matt\documents\development\c++\directxgameengine\directxengine\textureshaderclass.cpp(253): warning C4101: 'i': unreferenced local variable
+  textureclass.cpp
+  systemclass.cpp
+  objparser.cpp
+  modelclass.cpp
+c:\users\matt\documents\development\c++\directxgameengine\directxengine\modelclass.cpp(247): warning C4101: 'i': unreferenced local variable
+  main.cpp
+  lightshaderclass.cpp
+c:\users\matt\documents\development\c++\directxgameengine\directxengine\lightshaderclass.cpp(315): warning C4244: '=': conversion from 'SIZE_T' to 'unsigned long', possible loss of data
+c:\users\matt\documents\development\c++\directxgameengine\directxengine\lightshaderclass.cpp(319): warning C4018: '<': signed/unsigned mismatch
+c:\users\matt\documents\development\c++\directxgameengine\directxengine\lightshaderclass.cpp(309): warning C4101: 'i': unreferenced local variable
+  lightclass.cpp
+  inputclass.cpp
+  graphicsclass.cpp
+  d3dclass.cpp
+c:\users\matt\documents\development\c++\directxgameengine\directxengine\d3dclass.cpp(94): warning C4018: '<': signed/unsigned mismatch
+c:\users\matt\documents\development\c++\directxgameengine\directxengine\d3dclass.cpp(33): warning C4101: 'i': unreferenced local variable
+  colorshaderclass.cpp
+  cameraclass.cpp
+  Generating Code...
+  DirectXEngine.vcxproj -> C:\Users\Matt\Documents\Development\C++\DirectXGameEngine\x64\Debug\DirectXEngine.exe
+  DirectXEngine.vcxproj -> C:\Users\Matt\Documents\Development\C++\DirectXGameEngine\x64\Debug\DirectXEngine.pdb (Full PDB)

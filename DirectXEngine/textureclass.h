@@ -4,6 +4,10 @@
 
 #include <d3d11.h>
 #include <stdio.h>
+#include "DDSTextureLoader.h"
+using namespace DirectX;
+
+
 
 
 class TextureClass
@@ -24,6 +28,7 @@ public:
 	~TextureClass();
 
 	bool Initialize(ID3D11Device*, ID3D11DeviceContext*, char*);
+	bool Initialize(ID3D11Device* device, WCHAR* filename);
 	void Shutdown();
 
 	ID3D11ShaderResourceView* GetTexture();

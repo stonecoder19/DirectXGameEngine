@@ -1,4 +1,6 @@
 #include "textureclass.h"
+#include <ppltasks.h>
+
 
 
 TextureClass::TextureClass()
@@ -26,6 +28,9 @@ bool TextureClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceC
 	HRESULT hResult;
 	unsigned int rowPitch;
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+
+	
+
 
 
 	//Load the targa image data into memory
@@ -86,6 +91,23 @@ bool TextureClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceC
 	return true;
 
 }
+
+
+bool TextureClass::Initialize(ID3D11Device* device, wchar_t* filename)
+{
+	HRESULT result;
+
+	result = CreateDDSTextureFromFile(device,filename,nullptr,&m_textureView);
+
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+
+}
+
 
 void TextureClass::Shutdown()
 {
