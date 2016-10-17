@@ -12,6 +12,7 @@ GraphicsClass::GraphicsClass()
 	m_lightShader = 0;
 	m_Light = 0;
 
+	m_Text = 0;
 }
 
 GraphicsClass::GraphicsClass(const GraphicsClass& graphicsClass)
@@ -27,6 +28,7 @@ GraphicsClass::~GraphicsClass()
 bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 {
 	bool result;
+	XMMATRIX baseViewMatrix;
 
 	//Create the Direct3D object
 	m_D3D = new D3DClass;
@@ -52,10 +54,12 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	}
 
 	//set the intial position of the camera
-	m_Camera->SetPosition(0.0f, 0.0f, -10.0f);
+	m_Camera->SetPosition(0.0f, 0.0f, -1.0f);
+	m_Camera->Render();
+	m_Camera->GetViewMatrix(baseViewMatrix);
 
 	//Create the model object
-	m_Model = new ModelClass;
+	/*m_Model = new ModelClass;
 	if (!m_Model)
 	{
 		return false;
@@ -67,7 +71,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	{
 		MessageBox(hwnd, L"Could not intialize the model object", L"Error", MB_OK);
 		return false;
-	}
+	}*/
 
 	//create the color shader object
 	/*m_ColorShader = new ColorShaderClass;
@@ -102,7 +106,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 		return false;
 	}*/
 
-	m_lightShader = new LightShaderClass;
+	/*m_lightShader = new LightShaderClass;
 	if (!m_lightShader)
 	{
 		return false;
@@ -127,7 +131,20 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	m_Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
 	m_Light->SetDirection(0.0f, 0.0f, 1.0f);
 	m_Light->SetSpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
-	m_Light->SetSpecularPower(32.0f);
+	m_Light->SetSpecularPower(32.0f);*/
+
+	m_Text = new TextClass;
+	if (!m_Text)
+	{
+		return false;
+	}
+
+	result = m_Text->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), hwnd, screenWidth, screenHeight, baseViewMatrix);
+	if (!result)
+	{
+		MessageBox(hwnd, L"Could not initialize object", L"Error", MB_OK);
+		return false;
+	}
 
 
 	return true;
@@ -139,7 +156,7 @@ void GraphicsClass::Shutdown()
 
 
 	//Release the light object
-	if (m_Light)
+	/*if (m_Light)
 	{
 		delete m_Light;
 		m_Light = 0;
@@ -162,6 +179,13 @@ void GraphicsClass::Shutdown()
 		m_TextureShader = 0;
 	}*/
 
+	if (m_Text)
+	{
+		m_Text->Shutdown();
+		delete m_Text;
+		m_Text = 0;
+	}
+
 
 	if (m_D3D)
 	{
@@ -179,12 +203,12 @@ void GraphicsClass::Shutdown()
 	}*/
 
 	//release the model object
-	if (m_Model)
+	/*if (m_Model)
 	{
 		m_Model->Shutdown();
 		delete m_Model;
 		m_Model = 0;
-	}
+	}*/
 
 	//release the camera object
 	if (m_Camera)
@@ -222,7 +246,7 @@ bool GraphicsClass::Frame()
 
 bool GraphicsClass::Render(float rotation)
 {
-	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	XMMATRIX worldMatrix, viewMatrix, projectionMatrix,orthoMatrix;
 	bool result;
 
 
@@ -236,17 +260,25 @@ bool GraphicsClass::Render(float rotation)
 	m_D3D->GetWorldMatrix(worldMatrix);
 	m_Camera->GetViewMatrix(viewMatrix);
 	m_D3D->GetProjectionMatrix(projectionMatrix);
+	m_D3D->GetOrthoMatrix(orthoMatrix);
+
+	m_D3D->TurnZBufferOff();
+
+	m_D3D->TurnOnAlphaBlending();
+
+	result = m_Text->Render(m_D3D->GetDeviceContext(), worldMatrix, orthoMatrix);
+	
 
 	//rotate the world matrix by the rotation value
-	worldMatrix = XMMatrixRotationY(rotation);
+	//worldMatrix = XMMatrixRotationY(rotation);
 
 	//put the model vertex and index buffers on the graphics pipeline to prepare them for drawing
-	m_Model->Render(m_D3D->GetDeviceContext());
+	//m_Model->Render(m_D3D->GetDeviceContext());
 
 
-	result = m_lightShader->Render(m_D3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
-		m_Model->GetTexture(), m_Light->GetDirection(),m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(),
-						m_Camera->GetPosition(),m_Light->GetSpecularColor(),m_Light->GetSpecularPower());
+	//result = m_lightShader->Render(m_D3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
+	//	m_Model->GetTexture(), m_Light->GetDirection(),m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(),
+		//				m_Camera->GetPosition(),m_Light->GetSpecularColor(),m_Light->GetSpecularPower());
 
 	if (!result)
 	{
@@ -266,7 +298,11 @@ bool GraphicsClass::Render(float rotation)
 		return false;
 	}*/
 
-	
+	m_D3D->TurnOffAlphaBlending();
+
+	m_D3D->TurnZBufferOn();
+
+
 	//present the rendered scene to screen
 	m_D3D->EndScene();
 

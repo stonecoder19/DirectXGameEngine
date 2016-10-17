@@ -10,6 +10,7 @@
 
 #include "lightshaderclass.h"
 #include "lightclass.h"
+#include "textclass.h"
 
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
@@ -40,6 +41,8 @@ private:
 
 	LightShaderClass* m_lightShader;
 	LightClass* m_Light;
+
+	TextClass* m_Text;
 
 };
 

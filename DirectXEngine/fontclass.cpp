@@ -16,7 +16,7 @@ FontClass::~FontClass()
 
 }
 
-bool FontClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deivceContext,char* fontFilename, wchar_t* textureFilename)
+bool FontClass::Initialize(ID3D11Device* device,char* fontFilename, wchar_t* textureFilename)
 {
 	bool result;
 
@@ -125,6 +125,12 @@ void FontClass::ReleaseTexture()
 	}
 
 	return;	
+}
+
+
+ID3D11ShaderResourceView* FontClass::GetTexture()
+{
+	return m_Texture->GetTexture();
 }
 
 void FontClass::BuildVertexArray(void* vertices, char* sentence, float drawX, float drawY)
